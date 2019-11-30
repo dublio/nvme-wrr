@@ -81,15 +81,18 @@ function setup_hw_queue()
 	local nr_poll=0
 
 
+	# preload nvme module
+	modprobe nvme
+	sleep 3
+
 	local total=`cat /sys/block/nvme0n1/device/queue_count`
 	log "queue count $total"
 	g_wrr_queue_count=`expr $total / 4` # split into 4 parts: default, low, medium, high
+	log "g_wrr_queue_count: $g_wrr_queue_count"
 	local wrr_low_queues=$g_wrr_queue_count
 	local wrr_medium_queues=$g_wrr_queue_count
 	local wrr_high_queues=$g_wrr_queue_count
-
 	local wrr_urgent_queues=0
-
 
 	has_module $md
 	if [ $? -eq 1 ]; then
