@@ -1,5 +1,7 @@
 #!/bin/bash
 
+g_wrr_queue_count=8
+
 function log()
 {
 	local pid=`sh -c 'echo $PPID'`
@@ -25,7 +27,7 @@ function run_fio()
 		--filename=$rw_file \
 		--direct=1 \
 		--runtime=60 \
-		--numjobs=8 \
+		--numjobs=$g_wrr_queue_count \
 		--rw=$rw_test \
 		--name=${rw_name} \
 		--group_reporting \
@@ -77,9 +79,15 @@ function setup_hw_queue()
 	local md="nvme"
 	local nr_read=0
 	local nr_poll=0
-	local wrr_low_queues=0
-	local wrr_medium_queues=0
-	local wrr_high_queues=0
+
+
+	local total=`cat /sys/block/nvme0n1/device/queue_count`
+	log "queue count $total"
+	g_wrr_queue_count=`expr $total / 4` # split into 4 parts: default, low, medium, high
+	local wrr_low_queues=$g_wrr_queue_count
+	local wrr_medium_queues=$g_wrr_queue_count
+	local wrr_high_queues=$g_wrr_queue_count
+
 	local wrr_urgent_queues=0
 
 
