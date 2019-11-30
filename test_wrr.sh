@@ -91,7 +91,7 @@ function setup_hw_queue()
 	local wrr_urgent_queues=0
 
 
-	has_moudle $md 
+	has_module $md
 	if [ $? -eq 1 ]; then
 		modprobe -r $md
 	fi
@@ -105,7 +105,7 @@ function setup_hw_queue()
 		wrr_high_queues=$nr_high \
 		wrr_urgent_queues=$nr_urgent
 
-	has_moudle $md 
+	has_module $md
 
 	local cfg=`dmesg | grep wrr | tail -1`
 }
