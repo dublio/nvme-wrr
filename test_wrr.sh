@@ -138,3 +138,7 @@ setup_fio "/dev/nvme0n1" "read" "512K"
 test
 setup_fio "/dev/nvme0n1" "write" "512K"
 test
+
+dir="output_`date '+%F.%H.%M.%S'`"
+mkdir $dir
+mv *.log $dir
