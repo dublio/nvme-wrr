@@ -54,7 +54,7 @@ function test_perf()
 
 	# set wrr
 	file=$path/blkio.wrr
-	echo "$wrr" > $file
+	echo "259:0 $wrr" > $file
 	log "write $wrr to $file"
 	
 
