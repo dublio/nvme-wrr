@@ -68,7 +68,7 @@ function has_module()
 {
 	local md=$1
 	lsmod | grep -w $md > /dev/null
-	if [ $? ]; then
+	if [ $? -eq 0 ]; then
 		log "$md moudle exist"
 		return 1;
 	fi
@@ -102,7 +102,9 @@ function setup_hw_queue()
 		modprobe -r $md
 	fi
 
-	local file=$KERNEL_SOURCE_DIR/drivers/nvme/host/pci/$md.ko
+	local file=$KERNEL_SOURCE_DIR/drivers/nvme/host/nvme-core.ko
+	insmod $file
+	file=$KERNEL_SOURCE_DIR/drivers/nvme/host/$md.ko
 	insmod  $file \
 		read_queues=$nr_read \
 		poll_queues=$nr_poll \
@@ -111,7 +113,16 @@ function setup_hw_queue()
 		wrr_high_queues=$nr_high \
 		wrr_urgent_queues=$nr_urgent
 
-	has_module $md
+	# wait module ready
+	while true
+	do
+		has_module $md
+		if [ $? -eq 1 ]; then
+			break;
+		fi
+		sleep 1
+		echo "$md not ready, retry"
+	done
 
 	local cfg=`dmesg | grep wrr | tail -1`
 }
