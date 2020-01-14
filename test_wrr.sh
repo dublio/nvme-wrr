@@ -1,5 +1,6 @@
 #!/bin/bash
 
+KERNEL_SOURCE_DIR=/root/zwp/src/2nvme
 g_wrr_queue_count=8
 
 function log()
@@ -99,7 +100,7 @@ function setup_hw_queue()
 		modprobe -r $md
 	fi
 
-	local file=./drivers/nvme/host/pci/$md.ko
+	local file=$KERNEL_SOURCE_DIR/drivers/nvme/host/pci/$md.ko
 	insmod  $file \
 		read_queues=$nr_read \
 		poll_queues=$nr_poll \
