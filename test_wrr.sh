@@ -32,6 +32,8 @@ function run_fio()
 		--rw=$rw_test \
 		--name=${rw_name} \
 		--group_reporting \
+		--terse-version=3 \
+		--minimal \
 		--output $file
 }
 
