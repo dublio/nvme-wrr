@@ -22,7 +22,7 @@ function run_fio()
 {
 	local rw_name=$1
 	local file=${rw_test}_${rw_name}.log
-	log "start"
+	log "start run fio: $rw_test $rw_name"
 	fio --bs=$rw_bs \
 		--ioengine=libaio \
 		--iodepth=32 \
