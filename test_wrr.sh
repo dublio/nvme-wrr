@@ -92,10 +92,10 @@ function setup_hw_queue()
 	log "queue count $total"
 	g_wrr_queue_count=`expr $total / 4` # split into 4 parts: default, low, medium, high
 	log "g_wrr_queue_count: $g_wrr_queue_count"
-	local wrr_low_queues=$g_wrr_queue_count
-	local wrr_medium_queues=$g_wrr_queue_count
-	local wrr_high_queues=$g_wrr_queue_count
-	local wrr_urgent_queues=0
+	local nr_low=$g_wrr_queue_count
+	local nr_medium=$g_wrr_queue_count
+	local nr_high=$g_wrr_queue_count
+	local nr_urgent=0
 
 	has_module $md
 	if [ $? -eq 1 ]; then
