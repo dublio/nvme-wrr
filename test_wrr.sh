@@ -124,6 +124,15 @@ function setup_hw_queue()
 		echo "$md not ready, retry"
 	done
 
+	# wait nvme block device initilization done
+	while true
+	do
+		lsblk | grep nvme > /dev/null 2>&1
+		if [ $? -eq 0 ]; then
+			break;
+		fi
+		sleep 0.1
+	done
 	local cfg=`dmesg | grep wrr | tail -1`
 }
 
