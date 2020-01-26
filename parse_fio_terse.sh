@@ -17,7 +17,33 @@ function parse_bw_iops_lat_mean()
 	# 81 write_lat_mean
 	local write_lat_mean=`awk -F ";" '{print $81}' $file`
 
-	printf "%-20s %10d %10d %-10.2f %-10.2f\n", $file $bw $iops $read_lat_mean $write_lat_mean
+	#printf "%-40s %10d %10d %10.2f %10.2f\n" $file $bw $iops $read_lat_mean $write_lat_mean
+	printf "%-40s %-10d %-10d %-12.2f %-12.2f\n" $file $bw $iops $read_lat_mean $write_lat_mean
 }
 
-parse_bw_iops_lat_mean $1
+function parse_bw_iops_lat_mean_header()
+{
+	printf "%-40s %-10s %-10s %-12s %-12s\n" "test case" "bw" "iops" "rd_avg_lat" "wr_avg_lat"
+}
+
+function main()
+{
+	local fd=$1
+	if [ ! -e $fd ]; then
+		echo "Does not exist: $fd"
+		exit
+	fi
+
+	parse_bw_iops_lat_mean_header
+	if [ -d $fd ]; then
+		fs=`ls $fd`
+		for f in $fs
+		do
+			parse_bw_iops_lat_mean $fd/$f
+		done
+	elif [ -f $fd ]; then
+		parse_bw_iops_lat_mean $fd
+	fi
+}
+
+main $@
