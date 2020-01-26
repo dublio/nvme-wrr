@@ -61,7 +61,15 @@ function test_perf()
 	
 
 	# run fio
-	run_fio $wrr
+	local index
+	if [ $wrr == "low" ]; then
+		index="03"
+	elif [ $wrr == "medium" ]; then
+		index="02"
+	else
+		index="01"
+	fi
+	run_fio ${index}_${wrr}
 }
 
 function has_module()
