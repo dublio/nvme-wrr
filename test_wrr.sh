@@ -2,6 +2,7 @@
 
 KERNEL_SOURCE_DIR=/root/zwp/src/2nvme
 g_wrr_queue_count=8
+g_dev_name="nvme0n1"
 
 function log()
 {
@@ -56,8 +57,9 @@ function test_perf()
 
 	# set wrr
 	file=$path/blkio.wrr
-	echo "259:0 $wrr" > $file
-	log "write $wrr to $file"
+	local major_minor=`cat /sys/block/${g_dev_name}/dev`
+	echo "$major_minor $wrr" > $file
+	log "write $major_minor $wrr to $file"
 	
 
 	# run fio
@@ -96,7 +98,7 @@ function setup_hw_queue()
 	modprobe nvme
 	sleep 3
 
-	local total=`cat /sys/block/nvme0n1/device/queue_count`
+	local total=`cat /sys/block/${g_dev_name}/device/queue_count`
 	log "queue count $total"
 	g_wrr_queue_count=`expr $total / 4` # split into 4 parts: default, low, medium, high
 	log "g_wrr_queue_count: $g_wrr_queue_count"
@@ -158,13 +160,13 @@ function test()
 setup_hw_queue
 
 
-setup_fio "/dev/nvme0n1" "randread" "4K"
+setup_fio "/dev/${g_dev_name}" "randread" "4K"
 test
-setup_fio "/dev/nvme0n1" "randwrite" "4K"
+setup_fio "/dev/${g_dev_name}" "randwrite" "4K"
 test
-setup_fio "/dev/nvme0n1" "read" "512K"
+setup_fio "/dev/${g_dev_name}" "read" "512K"
 test
-setup_fio "/dev/nvme0n1" "write" "512K"
+setup_fio "/dev/${g_dev_name}" "write" "512K"
 test
 
 dir="output_`date '+%F.%H.%M.%S'`"
