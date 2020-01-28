@@ -92,6 +92,7 @@ function setup_hw_queue()
 	local md="nvme"
 	local nr_read=0
 	local nr_poll=0
+	local no_arg=$1
 
 
 	# preload nvme module
@@ -115,13 +116,17 @@ function setup_hw_queue()
 	local file=$KERNEL_SOURCE_DIR/drivers/nvme/host/nvme-core.ko
 	insmod $file
 	file=$KERNEL_SOURCE_DIR/drivers/nvme/host/$md.ko
-	insmod  $file \
-		read_queues=$nr_read \
-		poll_queues=$nr_poll \
-		wrr_low_queues=$nr_low \
-		wrr_medium_queues=$nr_medium \
-		wrr_high_queues=$nr_high \
-		wrr_urgent_queues=$nr_urgent
+	if [ $no_arg -eq 1 ]; then
+		insmod $file
+	else
+		insmod  $file \
+			read_queues=$nr_read \
+			poll_queues=$nr_poll \
+			wrr_low_queues=$nr_low \
+			wrr_medium_queues=$nr_medium \
+			wrr_high_queues=$nr_high \
+			wrr_urgent_queues=$nr_urgent
+	fi
 
 	# wait module ready
 	while true
@@ -157,7 +162,11 @@ function test()
 	log "done"
 }
 
-setup_hw_queue
+# do set any module parameters when load module
+setup_hw_queue 1
+
+# set wrr queues
+#setup_hw_queue 0
 
 
 setup_fio "/dev/${g_dev_name}" "randread" "4K"
