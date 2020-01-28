@@ -1,6 +1,6 @@
 #!/bin/bash
 
-KERNEL_SOURCE_DIR=/root/zwp/src/2nvme
+KERNEL_SOURCE_DIR=/root/zwp/src/5.6
 g_wrr_queue_count=8
 g_dev_name="nvme0n1"
 
@@ -113,6 +113,8 @@ function setup_hw_queue()
 		modprobe -r $md
 	fi
 
+	dmesg -C
+
 	local file=$KERNEL_SOURCE_DIR/drivers/nvme/host/nvme-core.ko
 	insmod $file
 	file=$KERNEL_SOURCE_DIR/drivers/nvme/host/$md.ko
@@ -148,7 +150,8 @@ function setup_hw_queue()
 		fi
 		sleep 0.1
 	done
-	local cfg=`dmesg | grep wrr | tail -1`
+	local cfg=`dmesg | grep "urgent queues" | tail -1`
+	log "$cfg"
 }
 
 
@@ -162,22 +165,63 @@ function test()
 	log "done"
 }
 
-# do set any module parameters when load module
-setup_hw_queue 1
+function test_rr()
+{
+	# do set any module parameters when load module
+	setup_hw_queue 1
 
-# set wrr queues
-#setup_hw_queue 0
+	# set wrr queues
+	#setup_hw_queue 0
 
 
-setup_fio "/dev/${g_dev_name}" "randread" "4K"
-test
-setup_fio "/dev/${g_dev_name}" "randwrite" "4K"
-test
-setup_fio "/dev/${g_dev_name}" "read" "512K"
-test
-setup_fio "/dev/${g_dev_name}" "write" "512K"
-test
+	setup_fio "/dev/${g_dev_name}" "randread" "4K"
+	test
+	setup_fio "/dev/${g_dev_name}" "randwrite" "4K"
+	test
+	setup_fio "/dev/${g_dev_name}" "read" "512K"
+	test
+	setup_fio "/dev/${g_dev_name}" "write" "512K"
+	test
 
-dir="output_`date '+%F.%H.%M.%S'`"
-mkdir $dir
-mv *.log $dir
+	dir="rr"
+	rm -rf $dir
+	mkdir $dir
+	mv *.log $dir
+
+}
+
+function test_wrr()
+{
+	# do set any module parameters when load module
+	#setup_hw_queue 1
+
+	# set wrr queues
+	setup_hw_queue 0
+
+	setup_fio "/dev/${g_dev_name}" "randread" "4K"
+	test
+	setup_fio "/dev/${g_dev_name}" "randwrite" "4K"
+	test
+	setup_fio "/dev/${g_dev_name}" "read" "512K"
+	test
+	setup_fio "/dev/${g_dev_name}" "write" "512K"
+	test
+
+	dir="wrr"
+	rm -rf $dir
+	mkdir $dir
+	mv *.log $dir
+}
+
+log "start test NVMe rr"
+test_rr
+
+sleep 30
+
+log "start test NVMe wrr"
+
+test_wrr
+
+log "start compare data"
+
+./cmp.sh
