@@ -17,8 +17,9 @@ function parse_bw_iops_lat_mean()
 	# 81 write_lat_mean
 	local write_lat_mean=`awk -F ";" '{print $81}' $file`
 
+	local test_case=`echo $file | sed 's#./##' | sed 's/.log//' | sed 's/_0[0-9]_/_/'`
 	#printf "%-40s %10d %10d %10.2f %10.2f\n" $file $bw $iops $read_lat_mean $write_lat_mean
-	printf "%-40s %-10d %-10d %-12.2f %-12.2f\n" $file $bw $iops $read_lat_mean $write_lat_mean
+	printf "%-40s %-10d %-10d %-12.2f %-12.2f\n" $test_case $bw $iops $read_lat_mean $write_lat_mean
 }
 
 function parse_bw_iops_lat_mean_header()
