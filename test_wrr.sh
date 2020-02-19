@@ -99,7 +99,13 @@ function setup_hw_queue()
 	modprobe nvme
 	sleep 3
 
-	local total=`cat /sys/block/${g_dev_name}/device/queue_count`
+	local qcnt_file=/sys/block/${g_dev_name}/device/queue_count
+	local total=0
+	if [ -e $qcnt_file ]; then
+		total=`cat $qcnt_file`
+	else
+		total=`ls /sys/block/${g_dev_name}/mq/ | wc -l`
+	fi
 	log "queue count $total"
 	g_wrr_queue_count=`expr $total / 4` # split into 4 parts: default, low, medium, high
 	log "g_wrr_queue_count: $g_wrr_queue_count"
