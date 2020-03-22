@@ -87,6 +87,18 @@ function has_module()
 	return 0
 }
 
+function modify_hw_weight()
+{
+       local h=64
+       local m=32
+       local l=8
+       local ab=0
+
+       nvme set-feature /dev/${g_dev_name} -f 1 -v `printf "0x%x\n" $(($ab<<0|$l<<8|$m<<16|$h<<24))`
+
+	log "nvme weight, high=$h, medium=$m, low=$l"
+}
+
 function setup_hw_queue()
 {
 	local md="nvme"
@@ -158,6 +170,8 @@ function setup_hw_queue()
 	done
 	local cfg=`dmesg | grep "urgent queues" | tail -1`
 	log "$cfg"
+
+	modify_hw_weight
 }
 
 
